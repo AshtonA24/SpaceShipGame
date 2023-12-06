@@ -37,8 +37,6 @@ public class SpaceFighter {
         posY = x;
     }
 
-   
-
     public int getWidth(){
         return width;
     }
@@ -74,4 +72,6 @@ public class SpaceFighter {
     public void setMoveY(int x){
         moveY = x;
     }
+
+    
 }

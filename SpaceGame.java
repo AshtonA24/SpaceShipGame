@@ -28,10 +28,10 @@ public class SpaceGame extends JPanel implements KeyListener {
     boolean rechargeLaserJuice;
     ArrayList<SpaceFighter> fighters = new ArrayList<>();
     SpaceShip player = new SpaceShip(0, frameHeight/2, 10, 10, Color.GREEN);
-    SpacePellet pellet = new SpacePellet(r.nextInt(400) + 50, r.nextInt(400) + 50, 20, 20, 0, 0, 0, Color.PINK);
-    SpaceScoreDeposit deposit = new SpaceScoreDeposit(r.nextInt(350) + 50, r.nextInt(350) + 50, 10, 10, 0, 0, 20, Color.ORANGE);
+    SpacePellet pellet = new SpacePellet(r.nextInt(400) + 50, r.nextInt(400) + 50, 20, 20, 0, 0, 0, Color.MAGENTA);
+    Spacetarget target = new Spacetarget(r.nextInt(350) + 50, r.nextInt(350) + 50, 50, 50, 0, 0, 20, Color.ORANGE);
     Font font = new Font("ArAkayaKanadakaial", Font.BOLD, 16);
-    int delay = 10;
+    int delay = 7;
     int fighterCount = 20;
     int score;
     boolean scoreDeposit;
@@ -131,8 +131,8 @@ public class SpaceGame extends JPanel implements KeyListener {
         //stars
         g.setColor(Color.WHITE);
         for(int i = 0; i < starCount; i+= 2){
-            g.fillOval(stars.get(i),stars.get(i+1),4,8);
-            g.fillOval(stars.get(i)-2,stars.get(i+1)+2,8,4);
+            g.fillOval(stars.get(i),stars.get(i+1),2,4);
+            g.fillOval(stars.get(i)-1,stars.get(i+1)+1,2,4);
         }
 
         // lasers
@@ -150,9 +150,9 @@ public class SpaceGame extends JPanel implements KeyListener {
         g.setColor(pellet.color);
         g.fillOval(pellet.posX, pellet.posY, pellet.width, pellet.height);
 
-        //score deposit
-        // g.setColor(deposit.color);
-        // g.fillOval(deposit.posX, deposit.posY, deposit.width, pellet.height);
+        //target
+        g.setColor(target.color);
+        g.fillRect(target.posX, target.posY, target.width, target.height);
 
         // player ship
         g.setColor(player.color);
@@ -182,6 +182,7 @@ public class SpaceGame extends JPanel implements KeyListener {
         checkLaserJuice();
         movePlayer();
         moveFighters();
+        checkShooting();
         checkCollisions();
     }
 
@@ -196,6 +197,18 @@ public class SpaceGame extends JPanel implements KeyListener {
             player.posY -= 5;
         if (s && player.posY < frameHeight - player.height)
             player.posY += 5;
+    }
+
+    
+
+    public void checkShooting(){
+        if (upLaser && target.posY < player.posY && target.posX - 20 <= player.posX - 10 && player.posX <= target.posX + target.width){
+            target.health --;
+        
+        if (target.health < 0){
+            target = new Spacetarget(r.nextInt(500) + 50, r.nextInt(350) + 50, 30, 30, 0, 0, 20, Color.ORANGE);
+        }
+    }
 
     }
 
@@ -218,13 +231,11 @@ public class SpaceGame extends JPanel implements KeyListener {
             if (f.getX() > frameWidth - f.getWidth() || f.getX() < 10) {
                 f.setMoveX(f.getMoveX() * (-1));
                 f.setX(f.previousX + f.getMoveX() * 3);
-
             }
 
             if (f.getY() > frameHeight - f.getHeight() || f.getY() < 10) {
                 f.setMoveY(f.getMoveY() * (-1));
                 f.setY(f.previousY + f.getMoveY() * 3);
-
             }
 
             f.setX(f.getX() + f.getMoveX());
@@ -300,7 +311,7 @@ public class SpaceGame extends JPanel implements KeyListener {
             }
         }
         if (pelletIntersects(pellet)) {
-            pellet = new SpacePellet(r.nextInt(frameWidth-100) + 50, r.nextInt(frameHeight-100) + 50, 20, 20, 0, 0, 0, Color.PINK);
+            pellet = new SpacePellet(r.nextInt(frameWidth-100) + 50, r.nextInt(frameHeight-100) + 50, 20, 20, 0, 0, 0, Color.MAGENTA);
             score ++;
         }
     }

@@ -1,5 +1,5 @@
 import java.awt.*;
-public class SpaceScoreDeposit {
+public class Spacetarget {
     int posX;
     int posY;
     int width;
@@ -13,7 +13,7 @@ public class SpaceScoreDeposit {
     Color color;
     
 
-    public SpaceScoreDeposit(int x, int y, int width, int height, int moveX, int moveY, int health, Color color){
+    public Spacetarget(int x, int y, int width, int height, int moveX, int moveY, int health, Color color){
         this.posX = x;
         this.posY = y;
         this.width = width;
