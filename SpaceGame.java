@@ -29,7 +29,7 @@ public class SpaceGame extends JPanel implements KeyListener {
     ArrayList<SpaceFighter> fighters = new ArrayList<>();
     SpaceShip player = new SpaceShip(0, frameHeight/2, 10, 10, Color.GREEN);
     SpacePellet pellet = new SpacePellet(r.nextInt(400) + 50, r.nextInt(400) + 50, 20, 20, 0, 0, 0, Color.MAGENTA);
-    Spacetarget target = new Spacetarget(r.nextInt(350) + 50, r.nextInt(350) + 50, 50, 50, 0, 0, 20, Color.ORANGE);
+    Spacetarget target = new Spacetarget(r.nextInt(350) + 50, r.nextInt(350) + 50, 30, 30, 0, 0, 20, Color.ORANGE);
     Font font = new Font("ArAkayaKanadakaial", Font.BOLD, 16);
     int delay = 7;
     int fighterCount = 20;
@@ -45,7 +45,7 @@ public class SpaceGame extends JPanel implements KeyListener {
     public SpaceGame() {
         JFrame frame = new JFrame("Space Fighters");
         frame.add(this);
-        frame.setSize(frameWidth, frameHeight+25);
+        frame.setSize(frameWidth, frameHeight+40);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         int x = (screenSize.width - frame.getWidth()) / 2;
@@ -201,16 +201,23 @@ public class SpaceGame extends JPanel implements KeyListener {
 
     
 
+
     public void checkShooting(){
-        if (upLaser && target.posY < player.posY && target.posX - 20 <= player.posX - 10 && player.posX <= target.posX + target.width){
+        if (upLaser && target.posY < player.posY && (target.posX - 20 <= player.posX - 10 && player.posX <= target.posX + target.width))
+            target.health --;
+        if (downLaser && target.posY > player.posY && (target.posX - 20 <= player.posX - 10 && player.posX <= target.posX + target.width))
+            target.health --;
+         if (leftLaser && target.posX < player.posY && (target.posY - 10 <= player.posY && player.posY <= target.posY + target.height))
+            target.health --;
+        if (rightLaser && target.posX > player.posY && (target.posY - 10 <= player.posY && player.posY <= target.posY + target.height))
             target.health --;
         
-        if (target.health < 0){
+        if (target.health < 0)
             target = new Spacetarget(r.nextInt(500) + 50, r.nextInt(350) + 50, 30, 30, 0, 0, 20, Color.ORANGE);
-        }
+        
     }
 
-    }
+    
 
     
 
