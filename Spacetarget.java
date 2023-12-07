@@ -1,5 +1,6 @@
 import java.awt.*;
-public class Spacetarget {
+public class SpaceTarget {
+    
     int posX;
     int posY;
     int width;
@@ -11,9 +12,10 @@ public class Spacetarget {
     int previousY;
     int health;
     Color color;
+    boolean laserHit;
     
 
-    public Spacetarget(int x, int y, int width, int height, int moveX, int moveY, int health, Color color){
+    public SpaceTarget(int x, int y, int width, int height, int moveX, int moveY, int health, Color color){
         this.posX = x;
         this.posY = y;
         this.width = width;
@@ -23,5 +25,6 @@ public class Spacetarget {
         this.moveY = moveY;
         this.health = health;
         this.color = color;
+        this.laserHit = false;
     }
 }

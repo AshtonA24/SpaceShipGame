@@ -1,79 +1,39 @@
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import javax.swing.JFrame;
+import java.awt.*;
+import javax.swing.*;
 
-public class test extends JFrame implements KeyListener {
-    private boolean wPressed = false;
-    private boolean aPressed = false;
-    private boolean sPressed = false;
-    private boolean dPressed = false;
+public class Test extends JPanel {
+    int laserXStart = 100, laserYStart = 400, laserXStop = 200, laserYStop = 0;
+    int side = 30, objectX = 130, objectY = 30;
 
-    public test() {
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(300, 300);
-        addKeyListener(this);
-        setFocusable(true);
-        setFocusTraversalKeysEnabled(false);
-        setLocationRelativeTo(null);
-        setVisible(true);
+    public Test() {
+        JFrame frame = new JFrame();
+        frame.add(this);
+        frame.setSize(200, 428);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setVisible(true);
+    }
 
-        // Example: continuously move in the pressed direction
-        while (true) {
-            if (wPressed) {
-                System.out.println("Moving UP");
-            }
-            if (aPressed) {
-                System.out.println("Moving LEFT");
-            }
-            if (sPressed) {
-                System.out.println("Moving DOWN");
-            }
-            if (dPressed) {
-                System.out.println("Moving RIGHT");
-            }
-
-            try {
-                Thread.sleep(100); // Adjust sleep duration as needed
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+    public void paintComponent(Graphics g) {
+        g.setColor(Color.black);
+        g.fillRect(0, 0, 200, 428);
+        g.setColor(Color.white);
+        g.fillRect(objectX, objectY, side, side);
+        g.drawLine(laserXStart, laserYStart, laserXStop, laserYStop);
+        if (intersects()) {
+            g.setColor(Color.red);
+            g.drawString("Intersection", 10, 20);
         }
+    }
+
+    public boolean intersects() {
+        int x1 = laserXStart, y1 = laserYStart, x2 = laserXStop, y2 = laserYStop;
+        int x3 = objectX, y3 = objectY, x4 = objectX + side, y4 = objectY + side;
+
+        // Check if the line intersects with the rectangle
+        return x1 < x4 && x2 > x3 && y1 > y4 && y2 < y3;
     }
 
     public static void main(String[] args) {
-        new test();
-    }
-
-    @Override
-    public void keyPressed(KeyEvent e) {
-        int key = e.getKeyCode();
-        if (key == KeyEvent.VK_W) {
-            wPressed = true;
-        } else if (key == KeyEvent.VK_A) {
-            aPressed = true;
-        } else if (key == KeyEvent.VK_S) {
-            sPressed = true;
-        } else if (key == KeyEvent.VK_D) {
-            dPressed = true;
-        }
-    }
-
-    @Override
-    public void keyReleased(KeyEvent e) {
-        int key = e.getKeyCode();
-        if (key == KeyEvent.VK_W) {
-            wPressed = false;
-        } else if (key == KeyEvent.VK_A) {
-            aPressed = false;
-        } else if (key == KeyEvent.VK_S) {
-            sPressed = false;
-        } else if (key == KeyEvent.VK_D) {
-            dPressed = false;
-        }
-    }
-
-    @Override
-    public void keyTyped(KeyEvent e) {
-        // Handle keyTyped event if needed
+        new Test();
     }
 }
