@@ -69,7 +69,7 @@ public class SpaceGameLevels extends JPanel implements KeyListener {
     public SpaceGameLevels() {
         JFrame frame = new JFrame("Space Fighters");
         frame.add(this);
-        frame.setSize(frameWidth, frameHeight + 27); // +27 for mac, + 40 for windows
+        frame.setSize(frameWidth, frameHeight + 27); // +27 for mac, +40 for windows
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         int screenX = (screenSize.width - frame.getWidth()) / 2;
