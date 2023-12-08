@@ -1,5 +1,9 @@
 package Space;
 import java.awt.*;
+import java.io.File;
+import java.util.ArrayList;
+
+import javax.swing.ImageIcon;
 public class SpaceBoss {
     int posX;
     int posY;
@@ -13,6 +17,9 @@ public class SpaceBoss {
     int health;
     boolean laserHit;
     Color color;
+    int imageTimer;
+    ArrayList <ImageIcon> images = new ArrayList <>();
+    ArrayList <ImageIcon> imagesHit = new ArrayList <>();
     
 
     public SpaceBoss(int x, int y, int width, int height, int moveX, int moveY, int timer, int health, Color color){
@@ -27,6 +34,16 @@ public class SpaceBoss {
         this.laserHit = false;
         this.health = health;
         this.color = color;
+        constructImage("SpaceBoss1.png");
+        constructImage("SpaceBoss2.png");
+        constructImage("SpaceBoss3.png");
+        constructImage("SpaceBoss4.png");
+        constructImageHit("SpaceBossHit1.png");
+        constructImageHit("SpaceBossHit2.png");
+        constructImageHit("SpaceBossHit3.png");
+        constructImageHit("SpaceBossHit4.png");
+        this.imageTimer = 0;
+
     }
 
     public int getX(){
@@ -79,6 +96,16 @@ public class SpaceBoss {
 
     public void setMoveY(int x){
         moveY = x;
+    }
+
+    public void constructImage(String fileName) {
+        File imageFile = new File("./images/" + fileName);
+        images.add(new ImageIcon (imageFile.toString()));
+    }
+
+    public void constructImageHit(String fileName) {
+        File imageFile = new File("./images/" + fileName);
+        imagesHit.add(new ImageIcon (imageFile.toString()));
     }
 
     

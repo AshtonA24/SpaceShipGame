@@ -5,7 +5,7 @@ import java.util.Random;
 import java.util.ArrayList;
 import java.awt.event.*;
 
-public class SpaceGame extends JPanel implements KeyListener {
+public class SpaceGameLevels extends JPanel implements KeyListener {
     Random r = new Random();
     boolean running = true;
     boolean w;
@@ -25,22 +25,31 @@ public class SpaceGame extends JPanel implements KeyListener {
     boolean staticShooting;
     int bossStageTimer;
     int staticShootingCount;
+    int level = 1;
+    boolean moveUp = true;
+    boolean moveDown = true;
+    boolean moveRight = true;
+    boolean moveLeft = true;
 
     // changeable commands
     int playerSpeed = 5;
     int maxLaserJuice = 200;
     int delay = 7; //lower = more
-    int fighterCount = 15;
-    int maxProjectileSpeed = 15; 
-    int projectileFrequency = 15; //lower = more
+    int fighterCount = 10;
+    int maxProjectileSpeed = 5; 
+    int projectileFrequency = 30; //lower = more
     int projectileSize = 30;
     int scoreToBoss = 5;
-    int bossHealth = 500;
-    int fighterSpeed = 5; //rounds up to nearest even number
+    int maxBossHealth = 500;
+    int fighterSpeed = 4; //rounds up to nearest even number
     int bossAnimationSpeed = 10; //lower = more
+    int bossShootingLength = 20;
+    int targetSize = 40;
+
+
     int shootingStageTime;
-
-
+    int bossHealth = maxBossHealth;
+    String targetIntersectDirection;
     int frameWidth = 1200;
     int frameHeight = 800;
     int laserJuice = maxLaserJuice;
@@ -50,15 +59,14 @@ public class SpaceGame extends JPanel implements KeyListener {
     ArrayList<SpaceProjectile> removeProjectiles = new ArrayList<>();
     SpaceShip player = new SpaceShip(0, frameHeight / 2, 10, 10, Color.GREEN);
     SpacePellet pellet = new SpacePellet(r.nextInt(400) + 50, r.nextInt(400) + 50, 20, 20, 0, 0, 0, Color.MAGENTA);
-    SpaceTarget target = new SpaceTarget(r.nextInt(350) + 50, r.nextInt(350) + 50, 30, 30, 0, 0, 50, Color.ORANGE);
+    SpaceTarget target = new SpaceTarget(r.nextInt(350) + 50, r.nextInt(350) + 50, targetSize, targetSize, 0, 0, 50, Color.ORANGE);
     SpaceBoss boss = new SpaceBoss(-200, -200, 100, 100, 1, 1, 0, bossHealth, Color.YELLOW);;
     SpaceBackground background = new SpaceBackground();
     Font font = new Font("ArAkayaKanadakaial", Font.BOLD, 16);
     int score;
     boolean scoreDeposit;
-    ArrayList<Integer> stars = new ArrayList<>();
 
-    public SpaceGame() {
+    public SpaceGameLevels() {
         JFrame frame = new JFrame("Space Fighters");
         frame.add(this);
         frame.setSize(frameWidth, frameHeight + 27); // +27 for mac, + 40 for windows
@@ -75,9 +83,15 @@ public class SpaceGame extends JPanel implements KeyListener {
         if (fighterSpeed % 2 !=0)
             fighterSpeed++;
 
+        
+
         // implement fighters
         for (int i = 0; i < fighterCount; i++) {
-            fighters.add(new SpaceFighter(r.nextInt(frameWidth - 150) + 100, r.nextInt(frameHeight - 100) + 100, 30, 30, 1, 1, r.nextInt(125)));
+            fighters.add(new SpaceFighter(r.nextInt(frameWidth - 450) + 300, r.nextInt(frameHeight - 400) + 200, 30, 30, 1, 1, 150));
+        }
+
+        for(int i = 0; i < level-1; i++){
+            nextLevel();
         }
     }
 
@@ -91,13 +105,13 @@ public class SpaceGame extends JPanel implements KeyListener {
             s = true;
         } else if (key == KeyEvent.VK_D) {
             d = true;
-        } else if (key == KeyEvent.VK_UP) {
+        } else if (key == KeyEvent.VK_UP &&!down && !left && !right) {
             up = true;
-        } else if (key == KeyEvent.VK_DOWN) {
+        } else if (key == KeyEvent.VK_DOWN &&!up && !left && !right) {
             down = true;
-        } else if (key == KeyEvent.VK_LEFT) {
+        } else if (key == KeyEvent.VK_LEFT &&!down && !up && !right) {
             left = true;
-        } else if (key == KeyEvent.VK_RIGHT) {
+        } else if (key == KeyEvent.VK_RIGHT &&!down && !left && !up) {
             right = true;
         }
     }
@@ -213,37 +227,43 @@ public class SpaceGame extends JPanel implements KeyListener {
             g.setColor(Color.RED);
             for (SpaceProjectile p : projectiles)
                 g.fillOval(p.posX, p.posY, p.width, p.height);
-            if (boss.laserHit)
-                g.setColor(Color.WHITE);
-            g.setColor(boss.color);
-            if (boss.imageTimer < bossAnimationSpeed){
-                g.drawImage(boss.images.get(0).getImage(), boss.posX, boss.posY, this);
-                if(boss.laserHit)
-                    g.drawImage(boss.imagesHit.get(0).getImage(), boss.posX, boss.posY, this);
-            }
-            else if (boss.imageTimer < bossAnimationSpeed * 2){
-                g.drawImage(boss.images.get(1).getImage(), boss.posX, boss.posY, this);
-                if(boss.laserHit)
-                    g.drawImage(boss.imagesHit.get(1).getImage(), boss.posX, boss.posY, this);
-            }
-            else if (boss.imageTimer < bossAnimationSpeed * 3){
-                g.drawImage(boss.images.get(2).getImage(), boss.posX, boss.posY, this);
-                if(boss.laserHit)
-                    g.drawImage(boss.imagesHit.get(2).getImage(), boss.posX, boss.posY, this);
-            }
-            else if (boss.imageTimer < bossAnimationSpeed * 4){
-                g.drawImage(boss.images.get(3).getImage(), boss.posX, boss.posY, this);
-                if(boss.laserHit)
-                    g.drawImage(boss.imagesHit.get(3).getImage(), boss.posX, boss.posY, this);
-            }
-             else 
-                boss.imageTimer = 0;
-            boss.imageTimer ++;
+            if (staticShooting)
+                bossAnimationSpeed = 8; //spin speed when shooting
+            else
+                bossAnimationSpeed = 25; //spin speed when moving
+
+                if (boss.laserHit)
+                    g.setColor(Color.WHITE);
+                g.setColor(boss.color);
+                if (boss.imageTimer < bossAnimationSpeed){
+                    g.drawImage(boss.images.get(0).getImage(), boss.posX, boss.posY, this);
+                    if(boss.laserHit)
+                        g.drawImage(boss.imagesHit.get(0).getImage(), boss.posX, boss.posY, this);
+                }
+                else if (boss.imageTimer < bossAnimationSpeed * 2){
+                    g.drawImage(boss.images.get(1).getImage(), boss.posX, boss.posY, this);
+                    if(boss.laserHit)
+                        g.drawImage(boss.imagesHit.get(1).getImage(), boss.posX, boss.posY, this);
+                }
+                else if (boss.imageTimer < bossAnimationSpeed * 3){
+                    g.drawImage(boss.images.get(2).getImage(), boss.posX, boss.posY, this);
+                    if(boss.laserHit)
+                        g.drawImage(boss.imagesHit.get(2).getImage(), boss.posX, boss.posY, this);
+                }
+                else if (boss.imageTimer < bossAnimationSpeed * 4){
+                    g.drawImage(boss.images.get(3).getImage(), boss.posX, boss.posY, this);
+                    if(boss.laserHit)
+                        g.drawImage(boss.imagesHit.get(3).getImage(), boss.posX, boss.posY, this);
+                }
+                else 
+                    boss.imageTimer = 0;
+                boss.imageTimer ++;
+            
 
             g.setColor(Color.WHITE); //health bar
             g.fillRect(boss.posX + boss.width/2 - 40, boss.posY + boss.height + 10, 80, 6);
             g.setColor(Color.GREEN); //healthbar
-            g.fillRect(boss.posX + boss.width/2 - 40, boss.posY + boss.height + 10, (int) (80 * (boss.health/500.0)), 6);
+            g.fillRect(boss.posX + boss.width/2 - 40, boss.posY + boss.height + 10, (int) (80 * (1.0*boss.health/maxBossHealth)), 6);
         }
 
         // laser juice meter
@@ -257,7 +277,7 @@ public class SpaceGame extends JPanel implements KeyListener {
         g.fillRect(frameWidth - 115, frameHeight - 30, 100, 15);
         g.setColor(Color.BLACK);
         g.setFont(font);
-        g.drawString("Score: " + boss.imageTimer, frameWidth - 100, frameHeight - 17);
+        g.drawString("Level: " + level, frameWidth - 100, frameHeight - 17);
 
     }
 
@@ -272,15 +292,17 @@ public class SpaceGame extends JPanel implements KeyListener {
     }
 
     public void movePlayer() {
-        // moves player
-        if (d && player.posX < frameWidth - player.width)
+        player.previousX = player.posX;
+        player.previousY = player.posY;
+        if ((d && player.posX < frameWidth - player.width) )
             player.posX += playerSpeed;
-        if (a && player.posX > 0)
+        if ((a && player.posX > 0) )
             player.posX -= playerSpeed;
-        if (w && player.posY > 0)
+        if ((w && player.posY > 0) )
             player.posY -= playerSpeed;
-        if (s && player.posY < frameHeight - player.height)
+        if ((s && player.posY < frameHeight - player.height))
             player.posY += playerSpeed;
+        checkTargetCollision();
     }
 
     public void checkShooting() {
@@ -308,7 +330,7 @@ public class SpaceGame extends JPanel implements KeyListener {
             }
 
             if (boss.health < 0) {
-                restartGame();
+                nextLevel();
             }
         } else {
 
@@ -335,7 +357,7 @@ public class SpaceGame extends JPanel implements KeyListener {
             }
 
             if (target.health < 0) {
-                target = new SpaceTarget(r.nextInt(500) + 50, r.nextInt(350) + 50, 30, 30, 0, 0, 50, Color.ORANGE);
+                target = new SpaceTarget(r.nextInt(500) + 50, r.nextInt(350) + 50, targetSize, targetSize, 0, 0, 50, Color.ORANGE);
                 score++;
             }
         }
@@ -351,7 +373,7 @@ public class SpaceGame extends JPanel implements KeyListener {
             f.previousY = f.getY();
 
             while (f.getTimer() > 150 || f.getMoveX() == 0 || f.getMoveY() == 0) {
-                f.clearTimer();
+                f.timer = r.nextInt(125);
                 f.setMoveX(r.nextInt(fighterSpeed+1) - fighterSpeed/2);
                 f.setMoveY(r.nextInt(fighterSpeed+1) - fighterSpeed/2);
             }
@@ -368,6 +390,8 @@ public class SpaceGame extends JPanel implements KeyListener {
 
             f.setX(f.getX() + f.getMoveX());
             f.setY(f.getY() + f.getMoveY());
+
+            checkFighterTargetCollision(f);
         }
     }
 
@@ -465,6 +489,39 @@ public class SpaceGame extends JPanel implements KeyListener {
                 && (f.posY - 10 <= player.posY && player.posY <= f.posY + f.height);
     }
 
+
+    public void checkTargetCollision(){
+        boolean betweenY = (target.posY - player.height <= player.posY && player.posY  <= target.posY + target.height);
+        boolean betweenX = (target.posX - player.width <= player.posX && player.posX  <= target.posX + target.width);
+        boolean touchingLeft = (player.previousX + player.width < target.posX && player.posX +player.width >= target.posX);
+        boolean touchingRight = (player.previousX > target.posX + target.width && player.posX <= target.posX + target.width);
+        boolean touchingTop = (player.previousY + player.height < target.posY && player.posY + player.height >= target.posY);
+        boolean touchingBottom = (player.previousY > target.posY + target.height && player.posY <= target.posY + target.height);
+        if (betweenY && (touchingLeft || touchingRight))
+            player.posX = player.previousX;
+        if (betweenX && (touchingTop || touchingBottom))
+            player.posY = player.previousY;
+    }
+
+    public void checkFighterTargetCollision(SpaceFighter f){
+        boolean betweenY = (target.posY - f.height <= f.posY && f.posY  <= target.posY + target.height);
+        boolean betweenX = (target.posX - f.width <= f.posX && f.posX  <= target.posX + target.width);
+        boolean touchingLeft = (f.previousX + f.width < target.posX && f.posX +f.width >= target.posX);
+        boolean touchingRight = (f.previousX > target.posX + target.width && f.posX <= target.posX + target.width);
+        boolean touchingTop = (f.previousY + f.height < target.posY && f.posY + f.height >= target.posY);
+        boolean touchingBottom = (f.previousY > target.posY + target.height && f.posY <= target.posY + target.height);
+        if (betweenY && (touchingLeft || touchingRight)){
+            f.posX = f.previousX;
+            f.moveX = f.moveX * -1;
+        }
+        if (betweenX && (touchingTop || touchingBottom)){
+            f.posY = f.previousY;
+            f.moveY = f.moveY * -1;
+        }
+        
+        
+    }
+
     public void checkBossFight() {
         if (score == scoreToBoss) {
             bossy = true;
@@ -513,7 +570,7 @@ public class SpaceGame extends JPanel implements KeyListener {
             if (bossStageTimer > 150) {
                 staticShooting = true;
                 bossStageTimer = 0;
-                shootingStageTime = r.nextInt(30);
+                shootingStageTime = r.nextInt(bossShootingLength);
             }
             // ends shooting stage
             if (staticShootingCount > shootingStageTime) {
@@ -534,19 +591,59 @@ public class SpaceGame extends JPanel implements KeyListener {
         projectiles.clear();
         player.color = Color.GREEN;
         pellet = new SpacePellet(r.nextInt(400) + 50, r.nextInt(400) + 50, 20, 20, 0, 0, 0, Color.MAGENTA);
-        target = new SpaceTarget(r.nextInt(350) + 50, r.nextInt(350) + 50, 30, 30, 0, 0, 50, Color.ORANGE);
+        target = new SpaceTarget(r.nextInt(350) + 50, r.nextInt(350) + 50, targetSize, targetSize, 0, 0, 50, Color.ORANGE);
         for (int i = 0; i < fighterCount; i++)
-            fighters.add(new SpaceFighter(r.nextInt(frameWidth - 150) + 100, r.nextInt(frameHeight - 100) + 100, 30, 30,
-                    1, 1, r.nextInt(125)));
+            fighters.add(new SpaceFighter(r.nextInt(frameWidth - 450) + 300, r.nextInt(frameHeight - 400) + 200, 30, 30, 1, 1, 150));
         score = 0;
-        boss.health = bossHealth;
+        maxBossHealth = 500;
+        boss.health = maxBossHealth;
+        bossHealth = maxBossHealth;
         bossy = false;
         bossStageTimer = 0;
         staticShooting = false;
         boss.posX = -200;
         boss.posY = -200;
+        fighterCount = 10;
+        maxProjectileSpeed = 5; 
+        projectileFrequency = 30; //lower = more
+        maxBossHealth = 500;
+        fighterSpeed = 4; //rounds up to nearest even number
+        bossShootingLength = 20;
+        level = 1;
+
         delay(2000);
         running = true;
+        super.repaint();
+    }
+
+    public void nextLevel() {
+        laserJuice = maxLaserJuice;
+        player.posX = 0;
+        player.posY = frameHeight / 2;
+        fighters.clear();
+        projectiles.clear();
+        player.color = Color.GREEN;
+        pellet = new SpacePellet(r.nextInt(400) + 50, r.nextInt(400) + 50, 20, 20, 0, 0, 0, Color.MAGENTA);
+        target = new SpaceTarget(r.nextInt(350) + 50, r.nextInt(350) + 50, targetSize, targetSize, 0, 0, 50, Color.ORANGE);
+        for (int i = 0; i < fighterCount; i++)
+            fighters.add(new SpaceFighter(r.nextInt(frameWidth - 450) + 300, r.nextInt(frameHeight - 400) + 200, 30, 30, 1, 1, 150));
+        maxBossHealth += 500;
+        bossHealth+=500;
+        boss.health+=500;
+        fighterCount += 3;
+        maxProjectileSpeed += 5;
+        if (projectileFrequency > 10)
+            projectileFrequency -= 5;
+        fighterSpeed += 2;
+        bossShootingLength +=5;
+        bossy = false;
+        bossStageTimer = 0;
+        staticShooting = false;
+        boss.posX = -200;
+        boss.posY = -200;
+        score = 0;
+        level++;
+        delay(1000);
         super.repaint();
     }
 
@@ -563,6 +660,6 @@ public class SpaceGame extends JPanel implements KeyListener {
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() ->new SpaceGame());
+        SwingUtilities.invokeLater(() ->new SpaceGameLevels());
     }
 }

@@ -1,4 +1,4 @@
-package Random;
+package Space;
 import java.awt.*;
 import java.io.File;
 import java.util.Random;
@@ -6,18 +6,12 @@ import java.util.random.*;
 
 import javax.swing.*;
 
-public class Test extends JPanel {
-    int laserXStart = 100, laserYStart = 400, laserXStop = 200, laserYStop = 0;
-    int side = 30, objectX = 130, objectY = 30;
+public class SpaceBackground extends JPanel {
+
     ImageIcon myPic;
 
-    public Test() {
-        JFrame frame = new JFrame();
-        frame.add(this);
-        frame.setSize(1800, 1800);  // Increase the width of the frame
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setVisible(true);
-        constructImage("SpaceStar.png");
+    public SpaceBackground() {
+        constructImage("SpaceBackground.png");
     }
 
     public void paintComponent(Graphics g) {
@@ -35,8 +29,4 @@ public class Test extends JPanel {
         myPic = new ImageIcon (imageFile.toString());
     }
 
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new Test());
-    }
 }

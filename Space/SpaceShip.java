@@ -9,6 +9,8 @@ public class SpaceShip {
     int moveX;
     int moveY;
     Color color;
+    int previousX;
+    int previousY;
     
 
     public SpaceShip(int x, int y, int width, int height, Color color){
