@@ -1,3 +1,4 @@
+package snake;
 public class SnakeApple {
     private int appleX;
     private int appleY;
